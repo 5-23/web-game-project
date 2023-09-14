@@ -1,8 +1,13 @@
 let canvas = document.querySelector("canvas");
 let ctx = canvas.getContext("2d");
-let mouse = { x: 0, y: 0 }
-let defualt = { x: 500, y: 500 }
+let mouse = {
+    x: 0,
+    y: 0
+}
 
+let defualt = { x: 500, y: 500 }
+// w a s d
+let keys = [null, null, null, null]
 class Player {
     constructor() {
         this.x = 0
@@ -11,6 +16,10 @@ class Player {
     }
     draw() {
         // this.dir %= 360
+        if (keys.includes("w"))this.y+=1
+        if (keys.includes("s"))this.y-=1
+        if (keys.includes("a"))this.x+=1
+        if (keys.includes("d"))this.x-=1
         ctx.beginPath() 
         ctx.fillStyle = "#3366ff"
         ctx.lineTo(defualt.x + Math.sin(degToRad(this.dir))*100,      defualt.y + Math.cos(degToRad(this.dir))*100);
@@ -19,8 +28,15 @@ class Player {
         ctx.fill()
     }
 
-    getX() { return this.x+defualt.x }
-    getY() { return this.y+defualt.y }
+    getX() { return defualt.x+this.x }
+    getY() { return defualt.y+this.y }
+}
+
+mouse.getX = () => {
+    player.getX() + mouse.x
+}
+mouse.getY = () => {
+    player.getY() + mouse.y
 }
 
 class Bullet {
@@ -28,14 +44,14 @@ class Bullet {
         this.r = 10;
         this.x = 0;
         this.y = 0;
-        this.seeX = player.getX() - mouse.x;
-        this.seeY = player.getY() - mouse.y;
+        this.seeX = defualt.x - mouse.x;
+        this.seeY = defualt.y - mouse.y;
     }
     
     draw() {
         ctx.beginPath()
         ctx.fillStyle="#3366ff"
-        ctx.arc(player.getX()+this.x, player.getY()+this.y, this.r, 0, 2 * Math.PI);
+        ctx.arc(defualt.x+this.x, defualt.y+this.y, this.r, 0, 2 * Math.PI);
         ctx.fill()
         // ctx.fillRect(player.getX()+this.x, player.getY()+this.y, 10, 10);
     }
@@ -150,11 +166,24 @@ document.body.addEventListener("mousedown", () => {
 
 })
 document.body.addEventListener("mousemove", (e) => {
-
     mouse.x = e.offsetX
     mouse.y = e.offsetY
-
 })
+
+document.body.addEventListener("keydown" , e => {
+    if (e.key == "w")keys[0] = "w"
+    if (e.key == "a")keys[1] = "a"
+    if (e.key == "s")keys[2] = "s"
+    if (e.key == "d")keys[3] = "d"
+})
+
+document.body.addEventListener("keyup" , e => {
+    if (e.key == "w")keys[0] = null
+    if (e.key == "a")keys[1] = null
+    if (e.key == "s")keys[2] = null
+    if (e.key == "d")keys[3] = null
+})
+
 genPlanet()
 loop()
 
