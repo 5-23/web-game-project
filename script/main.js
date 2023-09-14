@@ -25,16 +25,19 @@ class Player {
 
 class Bullet {
     constructor() {
-        this.s = 10;
-        this.x = -this.s/2;
-        this.y = -this.s/2;
+        this.r = 10;
+        this.x = 0;
+        this.y = 0;
         this.seeX = player.getX() - mouse.x;
         this.seeY = player.getY() - mouse.y;
     }
     
     draw() {
+        ctx.beginPath()
         ctx.fillStyle="#3366ff"
-        ctx.fillRect(player.getX()+this.x, player.getY()+this.y, 10, 10);
+        ctx.arc(player.getX()+this.x, player.getY()+this.y, this.r, 0, 2 * Math.PI);
+        ctx.fill()
+        // ctx.fillRect(player.getX()+this.x, player.getY()+this.y, 10, 10);
     }
     run() {
         this.x -= this.seeX/30;
@@ -44,6 +47,51 @@ class Bullet {
     getX() { return this.x+defualt.x }
     getY() { return this.y+defualt.y }
 
+    
+    getSeeX() { return this.x+player.getX() }
+    getSeeY() { return this.y+player.getY() }
+
+}
+
+class Planet {
+    constructor(){
+        this.r = Math.random() * 100;
+        this.x = Math.random() * 1000;
+        this.y = Math.random() * 100;
+        this.hp = this.r;
+        this.color = 0;
+    }
+
+    draw() {
+        ctx.beginPath()
+        this.color += -this.color/30
+        ctx.fillStyle=`rgb(255, 255, ${this.color})`
+        ctx.arc(player.getX()+this.x, player.getY()+this.y, this.r, 0, 2 * Math.PI);
+        ctx.fill()
+    }
+
+    /**
+     * 
+     * @param {Bullet} bullet 
+     */
+    collider(bullet) {
+        let hypo = Math.pow(this.getX()-bullet.getX(), 2) + Math.pow(this.getY()-bullet.getY(), 2)
+        if (hypo <= Math.pow(bullet.r + this.r, 2)) {
+            this.hp -= 10
+            bullet.y = -1000
+            this.color=255
+        }
+        if (this.hp <= 0) {
+            this.x = -player.getX() - 1000
+        }
+    }
+
+    getX() { return this.x+defualt.x }
+    getY() { return this.y+defualt.y }
+
+    
+    getSeeX() { return player.getX() + this.x }
+    getSeeY() { return player.getY() + this.y }
 }
 
 const degToRad = d => d / 180 * Math.PI;
@@ -52,6 +100,17 @@ const radToDeg = d => d * 180 / Math.PI;
 let player = new Player();
 /** @type {Array<Bullet>} */
 let bullet = []
+
+/** @type {Array<Planet>} */
+let planet = [];
+
+
+const genPlanet = () => {
+    if (planet.length < 5){
+        planet.push(new Planet())
+    }
+    setTimeout(genPlanet, 1000)
+}
 
 const loop = () => {
     ctx.clearRect(0, 0, 5000, 5000)
@@ -64,11 +123,25 @@ const loop = () => {
     bullet.forEach(e => {
         e.run();
         e.draw();
+        planet.forEach(p => {
+            p.collider(e)
+            if (p.getSeeX() <= -500 && p.hp >= -1000) { p.hp = -10000 }
+        })
     })
     if (bullet[0] != undefined){
-        if (bullet[0].getX() < -100 || bullet[0].getX() > 5000) bullet.shift()
+        if (bullet[0].getSeeX() < -100 || bullet[0].getSeeX() > 5000) bullet.shift()
+    }
+
+    
+    if (planet[0] != undefined){
+        if (planet[0].getSeeX() < -100 || planet[0].getSeeX() > 5000) planet.shift()
     }
     
+    
+    planet.forEach(p => {
+        p.draw()
+    })
+
     requestAnimationFrame(loop)
 }
 
@@ -82,5 +155,6 @@ document.body.addEventListener("mousemove", (e) => {
     mouse.y = e.offsetY
 
 })
+genPlanet()
 loop()
 
