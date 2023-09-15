@@ -33,17 +33,18 @@ class Player {
 }
 
 mouse.getX = () => {
-    player.getX() + mouse.x
+    defualt.x + mouse.x
 }
 mouse.getY = () => {
-    player.getY() + mouse.y
+    defualt.x + mouse.y
 }
+
 
 class Bullet {
     constructor() {
         this.r = 10;
-        this.x = 0;
-        this.y = 0;
+        this.x = player.x;
+        this.y = player.y;
         this.seeX = defualt.x - mouse.x;
         this.seeY = defualt.y - mouse.y;
     }
@@ -51,29 +52,35 @@ class Bullet {
     draw() {
         ctx.beginPath()
         ctx.fillStyle="#3366ff"
-        ctx.arc(defualt.x+this.x, defualt.y+this.y, this.r, 0, 2 * Math.PI);
+        ctx.arc(this.getX(), this.getY(), this.r, 0, 2 * Math.PI);
         ctx.fill()
         // ctx.fillRect(player.getX()+this.x, player.getY()+this.y, 10, 10);
     }
     run() {
-        this.x -= this.seeX/30;
-        this.y -= this.seeY/30;
+        this.x += this.seeX/30;
+        this.y += this.seeY/30;
     }
     
-    getX() { return this.x+defualt.x }
-    getY() { return this.y+defualt.y }
+    getX() { return player.getX() - this.x }
+    getY() { return player.getY() - this.y }
 
     
     getSeeX() { return this.x+player.getX() }
     getSeeY() { return this.y+player.getY() }
 
+    delete(){
+        this.seeX = 0;
+        this.seeY = 0;
+        this.x = 999999;
+        this.y = 999999;
+    }
 }
 
 class Planet {
     constructor(){
         this.r = Math.random() * 100;
-        this.x = Math.random() * 1000;
-        this.y = Math.random() * 100;
+        this.x = player.x + 200;
+        this.y = player.y + Math.random() * 1000;
         this.hp = this.r;
         this.color = 0;
     }
@@ -94,7 +101,7 @@ class Planet {
         let hypo = Math.pow(this.getX()-bullet.getX(), 2) + Math.pow(this.getY()-bullet.getY(), 2)
         if (hypo <= Math.pow(bullet.r + this.r, 2)) {
             this.hp -= 10
-            bullet.y = -1000
+            bullet.delete()
             this.color=255
         }
         if (this.hp <= 0) {
@@ -102,8 +109,8 @@ class Planet {
         }
     }
 
-    getX() { return this.x+defualt.x }
-    getY() { return this.y+defualt.y }
+    getX() { return this.x+player.getX() }
+    getY() { return this.y+player.getY() }
 
     
     getSeeX() { return player.getX() + this.x }
@@ -131,14 +138,18 @@ const genPlanet = () => {
 const loop = () => {
     ctx.clearRect(0, 0, 5000, 5000)
     player.draw()
-    if (player.getY() < mouse.y)player.dir = radToDeg(Math.atan((player.getX() - mouse.x) / (player.getY() - mouse.y)))
-    else player.dir = radToDeg(Math.atan((player.getX() - mouse.x) / (player.getY() - mouse.y))) + 180;
+    if (defualt.y < mouse.y)player.dir = radToDeg(Math.atan((defualt.x - mouse.x) / (defualt.y - mouse.y)))
+    else player.dir = radToDeg(Math.atan((defualt.x - mouse.x) / (defualt.y - mouse.y))) + 180;
     
     // player.dir += 0.1
 
     bullet.forEach(e => {
         e.run();
         e.draw();
+        ctx.beginPath();
+        ctx.lineTo(e.getX(), e.getSeeY);
+        ctx.lineTo(player.getX(), player.getSeeY);
+        ctx.stroke()
         planet.forEach(p => {
             p.collider(e)
             if (p.getSeeX() <= -500 && p.hp >= -1000) { p.hp = -10000 }
