@@ -16,15 +16,20 @@ class Player {
     }
     draw() {
         // this.dir %= 360
-        if (keys.includes("w"))this.y+=1
-        if (keys.includes("s"))this.y-=1
-        if (keys.includes("a"))this.x+=1
-        if (keys.includes("d"))this.x-=1
+        let spd = 5;
+        if (keys.includes("w")) this.y += spd
+        if (keys.includes("s")) this.y -= spd
+        if (keys.includes("a")) this.x += spd
+        if (keys.includes("d")) this.x -= spd
         ctx.beginPath() 
         ctx.fillStyle = "#3366ff"
         ctx.lineTo(defualt.x + Math.sin(degToRad(this.dir))*100,      defualt.y + Math.cos(degToRad(this.dir))*100);
         ctx.lineTo(defualt.x + Math.sin(degToRad(this.dir+120))*100,  defualt.y + Math.cos(degToRad(this.dir+120))*100);
         ctx.lineTo(defualt.x + Math.sin(degToRad(this.dir+240))*100,  defualt.y + Math.cos(degToRad(this.dir+240))*100);
+        ctx.fill()
+        ctx.beginPath() 
+        ctx.fillStyle = "red"
+        ctx.arc(defualt.x, defualt.y, 50, 0, 2 * Math.PI);
         ctx.fill()
     }
 
@@ -83,6 +88,9 @@ class Planet {
         this.y = player.y + Math.random() * 1000;
         this.hp = this.r;
         this.color = 0;
+
+        this.seeX = this.getX() - player.getX();
+        this.seeY = this.getY() - player.getY();
     }
 
     draw() {
@@ -93,6 +101,19 @@ class Planet {
         ctx.fill()
     }
 
+    run() {
+        this.x -= this.seeX/30;
+        this.y -= this.seeY/30;
+    }
+
+
+    delete(){
+        this.seeX = 0;
+        this.seeY = 0;
+        this.x = 999999;
+        this.y = 999999;
+    }
+
     /**
      * 
      * @param {Bullet} bullet 
@@ -101,6 +122,7 @@ class Planet {
         let hypo = Math.pow(this.getX()-bullet.getX(), 2) + Math.pow(this.getY()-bullet.getY(), 2)
         if (hypo <= Math.pow(bullet.r + this.r, 2)) {
             this.hp -= 10
+            console.log("collider")
             bullet.delete()
             this.color=255
         }
@@ -146,26 +168,19 @@ const loop = () => {
     bullet.forEach(e => {
         e.run();
         e.draw();
-        ctx.beginPath();
-        ctx.lineTo(e.getX(), e.getSeeY);
-        ctx.lineTo(player.getX(), player.getSeeY);
-        ctx.stroke()
+        if (Math.abs(e.getX() - player.getX()) >= 5000 || Math.abs(e.getY() - player.getY()) >= 5000) e.delete()
         planet.forEach(p => {
             p.collider(e)
             if (p.getSeeX() <= -500 && p.hp >= -1000) { p.hp = -10000 }
         })
     })
     if (bullet[0] != undefined){
-        if (bullet[0].getSeeX() < -100 || bullet[0].getSeeX() > 5000) bullet.shift()
-    }
-
-    
-    if (planet[0] != undefined){
-        if (planet[0].getSeeX() < -100 || planet[0].getSeeX() > 5000) planet.shift()
+        if (bullet[0].x == 999999 && bullet[0].y == 999999) bullet.shift()
     }
     
     
     planet.forEach(p => {
+        p.run()
         p.draw()
     })
 
