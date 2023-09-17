@@ -84,16 +84,18 @@ class Bullet {
 class Planet {
     constructor(){
         this.r = Math.random() * 100;
-        this.x = player.x + 200;
-        this.y = player.y + Math.random() * 1000;
+        this.x = player.x + Math.random()*100 * (Math.round(Math.random())?-1:1);
+        this.y = player.y + Math.random()*100 * (Math.round(Math.random())?-1:1);
         this.hp = this.r;
         this.color = 0;
 
-        this.seeX = this.getX() - player.getX();
-        this.seeY = this.getY() - player.getY();
+        this.seeX = Math.random()*100 * (Math.round(Math.random())?-1:1);
+        this.seeY = Math.random()*100 * (Math.round(Math.random())?-1:1);
+        console.log(this.seeX, this.seeY)
     }
 
     draw() {
+        if (this.x )
         ctx.beginPath()
         this.color += -this.color/30
         ctx.fillStyle=`rgb(255, 255, ${this.color})`
@@ -102,8 +104,8 @@ class Planet {
     }
 
     run() {
-        this.x -= this.seeX/30;
-        this.y -= this.seeY/30;
+        this.x -= this.seeX/100;
+        this.y -= this.seeY/100;
     }
 
 
@@ -154,7 +156,7 @@ const genPlanet = () => {
     if (planet.length < 5){
         planet.push(new Planet())
     }
-    setTimeout(genPlanet, 1000)
+    setTimeout(genPlanet, 5000)
 }
 
 const loop = () => {
@@ -180,6 +182,7 @@ const loop = () => {
     
     
     planet.forEach(p => {
+        if (Math.abs(p.getX() - player.getX()) >= 5000 || Math.abs(p.getY() - player.getY()) >= 5000) p.delete()
         p.run()
         p.draw()
     })
