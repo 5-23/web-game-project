@@ -1,3 +1,4 @@
+let debug = false;
 let LIMIT = 1000
 let canvas = document.querySelector("canvas");
 let ctx = canvas.getContext("2d");
@@ -11,6 +12,8 @@ let defualt = { x: 500, y: 500 }
 let keys = [null, null, null, null]
 class Player {
     constructor() {
+        this.r = 50
+        this.hp = 1000;
         this.x = 0
         this.y = 0
         this.dir = 360
@@ -23,15 +26,17 @@ class Player {
         if (keys.includes("a")) this.x += spd
         if (keys.includes("d")) this.x -= spd
         ctx.beginPath() 
-        ctx.fillStyle = "#3366ff"
+        ctx.fillStyle = "#c6a0f6"
         ctx.lineTo(defualt.x + Math.sin(degToRad(this.dir))*100,      defualt.y + Math.cos(degToRad(this.dir))*100);
         ctx.lineTo(defualt.x + Math.sin(degToRad(this.dir+120))*100,  defualt.y + Math.cos(degToRad(this.dir+120))*100);
         ctx.lineTo(defualt.x + Math.sin(degToRad(this.dir+240))*100,  defualt.y + Math.cos(degToRad(this.dir+240))*100);
         ctx.fill()
-        ctx.beginPath() 
-        ctx.fillStyle = "red"
-        ctx.arc(defualt.x, defualt.y, 50, 0, 2 * Math.PI);
-        ctx.fill()
+        if (debug){
+            ctx.beginPath() 
+            ctx.fillStyle = "red"
+            ctx.arc(defualt.x, defualt.y, this.r, 0, 2 * Math.PI);
+            ctx.fill()
+        }
     }
 
     getX() { return defualt.x+this.x }
@@ -45,7 +50,46 @@ mouse.getY = () => {
     defualt.x + mouse.y
 }
 
+class DeleteEffect{
+    /**
+     * 
+     * @param {Number} x 
+     * @param {Number} y 
+     * @param {Number} todoR 
+     */
+    constructor(x, y, todoR) {
+        this.r = todoR;
+        this.todoR = todoR*3;
+        this.x = x;
+        this.y = y;
+        this.cnt = 0;
+    }
+    
+    draw() {
+        if (this.cnt == 100){
+            this.delete()
+        }
+        this.r += (this.todoR-this.r)/30
+        if (this.x == 999999 && this.y == 999999) return
+        ctx.beginPath()
+        ctx.fillStyle=`rgba(245, 169, 127, ${1 - this.cnt/100})`
+        ctx.arc(this.getX(), this.getY(), this.r, 0, 2 * Math.PI);
+        ctx.fill()
+        this.cnt += 1;
+        // ctx.fillRect(player.getX()+this.x, player.getY()+this.y, 10, 10);
+    }
 
+
+    getX() { return this.x+player.getX() }
+    getY() { return this.y+player.getY() }
+
+    delete(){
+        this.seeX = 0;
+        this.seeY = 0;
+        this.x = 999999;
+        this.y = 999999;
+    }
+}
 class Bullet {
     constructor() {
         this.r = 10;
@@ -58,7 +102,7 @@ class Bullet {
     draw() {
         if (this.x == 999999 && this.y == 999999) return
         ctx.beginPath()
-        ctx.fillStyle="#3366ff"
+        ctx.fillStyle="#c6a0f6"
         ctx.arc(this.getX(), this.getY(), this.r, 0, 2 * Math.PI);
         ctx.fill()
         // ctx.fillRect(player.getX()+this.x, player.getY()+this.y, 10, 10);
@@ -75,7 +119,7 @@ class Bullet {
     getSeeX() { return this.x+player.getX() }
     getSeeY() { return this.y+player.getY() }
 
-    delete(){
+    delete(){        
         this.seeX = 0;
         this.seeY = 0;
         this.x = 999999;
@@ -105,25 +149,35 @@ class Planet {
         if (this.x == 999999 && this.y == 999999) return
         ctx.beginPath()
         this.color += -this.color/30
-        ctx.fillStyle=`rgb(255, 255, ${this.color})`
+        ctx.fillStyle=`rgb(${this.color+238}, ${this.color+212}, ${this.color+159})`
         ctx.arc(player.getX()+this.x, player.getY()+this.y, this.r, 0, 2 * Math.PI);
         ctx.fill()
 
-        ctx.beginPath()
-        this.color += -this.color/30
-        ctx.lineTo(defualt.x, defualt.y)
-        ctx.lineTo(player.getX()+this.x, player.getY()+this.y)
-        ctx.stroke()
+        if (debug){
+            ctx.beginPath()
+            this.color += -this.color/10
+            ctx.lineTo(defualt.x, defualt.y)
+            ctx.lineTo(player.getX()+this.x, player.getY()+this.y)
+            ctx.stroke()
+        }
     }
 
     run() {
         this.moveCnt += 1
         this.x -= this.seeX/100;
         this.y -= this.seeY/100;
+
+        let hypo2 = Math.pow(this.getSeeX()-defualt.x, 2) + Math.pow(this.getSeeY()-defualt.y, 2)
+        if (hypo2 <= Math.pow(player.r + this.r, 2)) {
+            this.delete()
+            player.hp -= this.hp
+            console.log("collider")
+        }
     }
 
 
     delete(){
+        effect.push(new DeleteEffect(this.x, this.y, this.r))
         this.seeX = 0;
         this.seeY = 0;
         this.x = 999999;
@@ -140,10 +194,11 @@ class Planet {
             this.hp -= 10
             console.log("collider")
             bullet.delete()
-            this.color=255
+            this.color=96
         }
+
         if (this.hp <= 0) {
-            this.x = -player.getX() - 1000
+            this.delete()
         }
     }
 
@@ -164,6 +219,9 @@ let bullet = []
 
 /** @type {Array<Planet>} */
 let planet = [];
+
+/** @type {Array<DeleteEffect>} */
+let effect = [];
 
 const genPlanet = () => {
     if (planet.length < LIMIT){
@@ -198,6 +256,9 @@ const loop = () => {
         if (p.moveCnt > 10000) p.delete()
         p.run()
         p.draw()
+    })
+    effect.forEach(e => {
+        e.draw()
     })
 
     requestAnimationFrame(loop)
