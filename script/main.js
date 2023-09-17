@@ -1,3 +1,4 @@
+let LIMIT = 1000
 let canvas = document.querySelector("canvas");
 let ctx = canvas.getContext("2d");
 let mouse = {
@@ -55,6 +56,7 @@ class Bullet {
     }
     
     draw() {
+        if (this.x == 999999 && this.y == 999999) return
         ctx.beginPath()
         ctx.fillStyle="#3366ff"
         ctx.arc(this.getX(), this.getY(), this.r, 0, 2 * Math.PI);
@@ -83,27 +85,39 @@ class Bullet {
 
 class Planet {
     constructor(){
-        this.r = Math.random() * 100;
-        this.x = player.x + Math.random()*100 * (Math.round(Math.random())?-1:1);
-        this.y = player.y + Math.random()*100 * (Math.round(Math.random())?-1:1);
+        this.moveCnt = 0;
+        
+        this.r = Math.random() * 200;
+        this.x = -player.getX() + defualt.x + Math.random()*3000 * (Math.round(Math.random())?-1:1);
+        this.y = -player.getY() + defualt.y + Math.random()*1000 * (Math.round(Math.random())?-1:1);
         this.hp = this.r;
         this.color = 0;
 
-        this.seeX = Math.random()*100 * (Math.round(Math.random())?-1:1);
-        this.seeY = Math.random()*100 * (Math.round(Math.random())?-1:1);
-        console.log(this.seeX, this.seeY)
+        this.seeX = (Math.random()*1000 * (Math.round(Math.random())?-1:1)) / this.r*10;
+        this.seeY = (Math.random()*1000 * (Math.round(Math.random())?-1:1)) / this.r*10;
+        // this.seeX = 0;
+        // this.seeY = 0;
+        // console.log(this.x, this.y)
     }
 
     draw() {
-        if (this.x )
+        // if (this.x < LIMIT)
+        if (this.x == 999999 && this.y == 999999) return
         ctx.beginPath()
         this.color += -this.color/30
         ctx.fillStyle=`rgb(255, 255, ${this.color})`
         ctx.arc(player.getX()+this.x, player.getY()+this.y, this.r, 0, 2 * Math.PI);
         ctx.fill()
+
+        ctx.beginPath()
+        this.color += -this.color/30
+        ctx.lineTo(defualt.x, defualt.y)
+        ctx.lineTo(player.getX()+this.x, player.getY()+this.y)
+        ctx.stroke()
     }
 
     run() {
+        this.moveCnt += 1
         this.x -= this.seeX/100;
         this.y -= this.seeY/100;
     }
@@ -151,12 +165,11 @@ let bullet = []
 /** @type {Array<Planet>} */
 let planet = [];
 
-
 const genPlanet = () => {
-    if (planet.length < 5){
+    if (planet.length < LIMIT){
         planet.push(new Planet())
     }
-    setTimeout(genPlanet, 5000)
+    setTimeout(genPlanet, 1000)
 }
 
 const loop = () => {
@@ -170,7 +183,7 @@ const loop = () => {
     bullet.forEach(e => {
         e.run();
         e.draw();
-        if (Math.abs(e.getX() - player.getX()) >= 5000 || Math.abs(e.getY() - player.getY()) >= 5000) e.delete()
+        if (Math.abs(e.x - player.x) >= 5000 || Math.abs(e.y - player.y) >= 5000) e.delete()
         planet.forEach(p => {
             p.collider(e)
             if (p.getSeeX() <= -500 && p.hp >= -1000) { p.hp = -10000 }
@@ -182,7 +195,7 @@ const loop = () => {
     
     
     planet.forEach(p => {
-        if (Math.abs(p.getX() - player.getX()) >= 5000 || Math.abs(p.getY() - player.getY()) >= 5000) p.delete()
+        if (p.moveCnt > 10000) p.delete()
         p.run()
         p.draw()
     })
