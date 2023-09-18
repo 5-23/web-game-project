@@ -13,7 +13,7 @@ let keys = [null, null, null, null]
 class Player {
     constructor() {
         this.r = 50
-        this.hp = 1000;
+        this.hp = 500;
         this.x = 0
         this.y = 0
         this.dir = 360
@@ -66,11 +66,12 @@ class DeleteEffect{
     }
     
     draw() {
-        if (this.cnt == 100){
+        if (this.x == 999999 && this.y == 999999) return
+        if (this.cnt >= 100){
             this.delete()
+            return
         }
         this.r += (this.todoR-this.r)/30
-        if (this.x == 999999 && this.y == 999999) return
         ctx.beginPath()
         ctx.fillStyle=`rgba(245, 169, 127, ${1 - this.cnt/100})`
         ctx.arc(this.getX(), this.getY(), this.r, 0, 2 * Math.PI);
@@ -142,6 +143,7 @@ class Planet {
         // this.seeX = 0;
         // this.seeY = 0;
         // console.log(this.x, this.y)
+        // console.log(this.r)
     }
 
     draw() {
@@ -163,6 +165,7 @@ class Planet {
     }
 
     run() {
+        if (this.seeX == 0 && this.seeY == 0) return
         this.moveCnt += 1
         this.x -= this.seeX/100;
         this.y -= this.seeY/100;
@@ -177,6 +180,7 @@ class Planet {
 
 
     delete(){
+        if (this.seeX == 0 && this.seeY == 0) return
         effect.push(new DeleteEffect(this.x, this.y, this.r))
         this.seeX = 0;
         this.seeY = 0;
@@ -232,6 +236,11 @@ const genPlanet = () => {
 
 const loop = () => {
     ctx.clearRect(0, 0, 5000, 5000)
+    
+    ctx.beginPath()
+    ctx.fillStyle="#ffffff"
+    ctx.font = "50px Pretendard"
+    ctx.fillText(player.hp, 30, 60)
     player.draw()
     if (defualt.y < mouse.y)player.dir = radToDeg(Math.atan((defualt.x - mouse.x) / (defualt.y - mouse.y)))
     else player.dir = radToDeg(Math.atan((defualt.x - mouse.x) / (defualt.y - mouse.y))) + 180;
@@ -249,6 +258,10 @@ const loop = () => {
     })
     if (bullet[0] != undefined){
         if (bullet[0].x == 999999 && bullet[0].y == 999999) bullet.shift()
+    }
+
+    if (effect[0] != undefined){
+        if (effect[0].x == 999999 && effect[0].y == 999999) effect.shift()
     }
     
     
