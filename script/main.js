@@ -20,8 +20,8 @@ let mouse = {
 let bs = 0;
 
 function shake(power){
-    if (power == undefined){ power = 100}
-    let repeat = 1;
+    if (power == undefined){ power = 100 }
+    let repeat = 2;
     for (let i = 0; i<repeat; i++){
         setTimeout(() => {
             if (i == repeat-1){
