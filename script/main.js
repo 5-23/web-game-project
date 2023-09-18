@@ -50,7 +50,7 @@ class Player {
     }
     draw() {
         if (player.hp < 0) player.hp = 0
-        if (player.hp > bs) bs = player.hp
+        if (player.hp > bs) bs = Math.round(player.hp)
         // this.dir %= 360
         let spd = 5;
         if (keys.includes("w")) this.y += spd
