@@ -2,11 +2,40 @@ let debug = false;
 let LIMIT = 1000
 let canvas = document.querySelector("canvas");
 let ctx = canvas.getContext("2d");
+const gameover = document.querySelector("div")
+
+let shakePos = {
+    x: 0,
+    y: 0
+}
+let canvasPos = {
+    x: 0,
+    y: 0
+}
+
 let mouse = {
     x: 0,
     y: 0
 }
 let bs = 0;
+
+function shake(power){
+    if (power == undefined){ power = 100}
+    let repeat = 2;
+    for (let i = 0; i<repeat; i++){
+        setTimeout(() => {
+            if (i == repeat-1){
+                console.log("end")
+                shakePos.y = 0
+                shakePos.x = 0
+            }else{
+                shakePos.y = Math.random()*power * (Math.round(Math.random())?-1:1)
+                shakePos.x = Math.random()*power * (Math.round(Math.random())?-1:1)
+            }
+        
+        }, 50 * i)
+    }
+}
 
 let defualt = { x: 500, y: 500 }
 // w a s d
@@ -14,7 +43,7 @@ let keys = [null, null, null, null]
 class Player {
     constructor() {
         this.r = 50
-        this.hp = 500;
+        this.hp = 100;
         this.x = 0
         this.y = 0
         this.dir = 360
@@ -68,13 +97,13 @@ class DeleteEffect{
     
     draw() {
         if (this.x == 999999 && this.y == 999999) return
-        if (this.cnt >= 100){
+        if (this.cnt >= 10){
             this.delete()
             return
         }
         this.r += (this.todoR-this.r)/30
         ctx.beginPath()
-        ctx.fillStyle=`rgba(245, 169, 127, ${1 - this.cnt/100})`
+        ctx.fillStyle=`rgba(245, 169, 127, ${1 - this.cnt/10})`
         ctx.arc(this.getX(), this.getY(), this.r, 0, 2 * Math.PI);
         ctx.fill()
         this.cnt += 1;
@@ -94,6 +123,7 @@ class DeleteEffect{
 }
 class Bullet {
     constructor() {
+        shake()
         this.r = 10;
         this.x = player.x;
         this.y = player.y;
@@ -188,6 +218,7 @@ class Planet {
         this.seeY = 0;
         this.x = 999999;
         this.y = 999999;
+        shake(this.r*10)
     }
 
     /**
@@ -203,7 +234,7 @@ class Planet {
             bullet.delete()
             this.color=96
             if (this.hp < 0) {
-                player.hp += Math.round(this.r/2)
+                player.hp += Math.round(this.r*1.1)
                 this.delete()
             }
         }
@@ -238,6 +269,11 @@ const genPlanet = () => {
 }
 
 const loop = () => {
+    defualt.x = 500 + canvasPos.x
+    defualt.y = 500 + canvasPos.y
+    canvasPos.x += (shakePos.x-canvasPos.x)/30
+    canvasPos.y += (shakePos.y-canvasPos.y)/30
+    canvas.style.left = `${canvasPos.x}px`
     ctx.clearRect(0, 0, 5000, 5000)
     
     ctx.beginPath()
@@ -279,9 +315,8 @@ const loop = () => {
     if (player.hp <= 0){ player.hp = 0 }
     if (player.hp <= 0){
         ctx.clearRect(0, 0, 5000, 5000)
-        div = document.querySelector("div")
-        div.style.display="flex"
-        div.innterHTML += `<h2>Best Score: ${bs}</h2>`
+        gameover.style.display="flex"
+        gameover.innerHTML += `<h2>Best Score: ${bs}</h2>`
         return
     }
 
@@ -313,4 +348,5 @@ document.body.addEventListener("keyup" , e => {
 
 genPlanet()
 loop()
-
+`
+`
