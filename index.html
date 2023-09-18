@@ -7,14 +7,43 @@
 </head>
 <body>
     <canvas width="5000", height="5000"></canvas>
+    <div>
+        <img src="logo.svg">
+        <h1>GAME OVER</h1>
+        <h2>Best Score: 1000</h2>
+    </div>
 </body>
 </html>
 <script src="script/main.js"></script>
 <style>
+    @import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css");
     *{
         margin: 0;
         padding: 0;
         box-sizing: border-box;
+        font-family: "pretendard";
+    }
+
+    div{
+        display: none;
+        align-items: center;
+        flex-direction: column;
+        width: 100vw;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -20%);
+        color: #fff;
+        > h1{
+            font-size: 10vw;
+        }
+        > img{
+            width: 10vw;
+        }
+        > h2{
+            font-size: 5vw;
+            color: #9399b2;
+        }
     }
 
     body{

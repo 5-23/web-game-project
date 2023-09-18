@@ -6,6 +6,7 @@ let mouse = {
     x: 0,
     y: 0
 }
+let bs = 0;
 
 let defualt = { x: 500, y: 500 }
 // w a s d
@@ -19,6 +20,8 @@ class Player {
         this.dir = 360
     }
     draw() {
+        if (player.hp < 0) player.hp = 0
+        if (player.hp > bs) bs = player.hp
         // this.dir %= 360
         let spd = 5;
         if (keys.includes("w")) this.y += spd
@@ -42,14 +45,12 @@ class Player {
     getX() { return defualt.x+this.x }
     getY() { return defualt.y+this.y }
 }
-
 mouse.getX = () => {
     defualt.x + mouse.x
 }
 mouse.getY = () => {
     defualt.x + mouse.y
 }
-
 class DeleteEffect{
     /**
      * 
@@ -98,6 +99,7 @@ class Bullet {
         this.y = player.y;
         this.seeX = defualt.x - mouse.x;
         this.seeY = defualt.y - mouse.y;
+        player.hp -= 10
     }
     
     draw() {
@@ -173,7 +175,7 @@ class Planet {
         let hypo2 = Math.pow(this.getSeeX()-defualt.x, 2) + Math.pow(this.getSeeY()-defualt.y, 2)
         if (hypo2 <= Math.pow(player.r + this.r, 2)) {
             this.delete()
-            player.hp -= this.hp
+            player.hp -= Math.round(this.hp)
             console.log("collider")
         }
     }
@@ -193,16 +195,17 @@ class Planet {
      * @param {Bullet} bullet 
      */
     collider(bullet) {
+        if (this.seeX == 0 && this.seeY == 0) return
         let hypo = Math.pow(this.getX()-bullet.getX(), 2) + Math.pow(this.getY()-bullet.getY(), 2)
         if (hypo <= Math.pow(bullet.r + this.r, 2)) {
             this.hp -= 10
             console.log("collider")
             bullet.delete()
             this.color=96
-        }
-
-        if (this.hp <= 0) {
-            this.delete()
+            if (this.hp < 0) {
+                player.hp += Math.round(this.r/2)
+                this.delete()
+            }
         }
     }
 
@@ -273,6 +276,14 @@ const loop = () => {
     effect.forEach(e => {
         e.draw()
     })
+    if (player.hp <= 0){ player.hp = 0 }
+    if (player.hp <= 0){
+        ctx.clearRect(0, 0, 5000, 5000)
+        div = document.querySelector("div")
+        div.style.display="flex"
+        div.innterHTML += `<h2>Best Score: ${bs}</h2>`
+        return
+    }
 
     requestAnimationFrame(loop)
 }
