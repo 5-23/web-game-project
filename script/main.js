@@ -205,7 +205,7 @@ class Planet {
         let hypo2 = Math.pow(this.getSeeX()-defualt.x, 2) + Math.pow(this.getSeeY()-defualt.y, 2)
         if (hypo2 <= Math.pow(player.r + this.r, 2)) {
             this.delete()
-            player.hp -= Math.round(this.hp)
+            player.hp -= this.hp
             console.log("collider")
         }
     }
@@ -234,7 +234,7 @@ class Planet {
             bullet.delete()
             this.color=96
             if (this.hp < 0) {
-                player.hp += Math.round(this.r*1.1)
+                player.hp += this.r*1.2
                 this.delete()
             }
         }
@@ -276,11 +276,6 @@ const loop = () => {
     canvas.style.left = `${canvasPos.x}px`
     ctx.clearRect(0, 0, 5000, 5000)
     
-    ctx.beginPath()
-    ctx.fillStyle="#ffffff"
-    ctx.font = "50px Pretendard"
-    ctx.fillText(player.hp, 30, 60)
-    player.draw()
     if (defualt.y < mouse.y)player.dir = radToDeg(Math.atan((defualt.x - mouse.x) / (defualt.y - mouse.y)))
     else player.dir = radToDeg(Math.atan((defualt.x - mouse.x) / (defualt.y - mouse.y))) + 180;
     
@@ -317,8 +312,13 @@ const loop = () => {
         ctx.clearRect(0, 0, 5000, 5000)
         gameover.style.display="flex"
         gameover.innerHTML += `<h2>Best Score: ${bs}</h2>`
+        document.getElementById("hp").style.display="none"
         return
     }
+
+    document.getElementById("hp").innerHTML = Math.round(player.hp)
+
+    player.draw()
 
     requestAnimationFrame(loop)
 }
