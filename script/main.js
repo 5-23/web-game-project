@@ -21,7 +21,7 @@ let bs = 0;
 
 function shake(power){
     if (power == undefined){ power = 100}
-    let repeat = 2;
+    let repeat = 1;
     for (let i = 0; i<repeat; i++){
         setTimeout(() => {
             if (i == repeat-1){
@@ -348,5 +348,4 @@ document.body.addEventListener("keyup" , e => {
 
 genPlanet()
 loop()
-`
-`
+
