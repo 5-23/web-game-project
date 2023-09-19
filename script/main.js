@@ -323,8 +323,8 @@ document.body.addEventListener("mousedown", () => {
 
 })
 document.body.addEventListener("mousemove", (e) => {
-    mouse.x = e.offsetX
-    mouse.y = e.offsetY
+    mouse.x = e.screenX
+    mouse.y = e.screenY
 })
 
 document.body.addEventListener("keydown" , e => {
