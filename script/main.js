@@ -23,20 +23,13 @@ let bs = 0;
 
 function shake(power){
     if (power == undefined){ power = 100 }
-    let repeat = 2;
-    for (let i = 0; i<repeat; i++){
-        setTimeout(() => {
-            if (i == repeat-1){
-                console.log("end")
-                shakePos.y = 0
-                shakePos.x = 0
-            }else{
-                shakePos.y = Math.random()*power * (Math.round(Math.random())?-1:1)
-                shakePos.x = Math.random()*power * (Math.round(Math.random())?-1:1)
-            }
-        
-        }, 50 * i)
-    }
+    console.log("shake!", power)
+    shakePos.y = Math.random()*power * (Math.round(Math.random())?-1:1)
+    shakePos.x = Math.random()*power * (Math.round(Math.random())?-1:1)
+    setTimeout(() => { 
+        shakePos.y = 0
+        shakePos.x = 0
+    }, 50)
 }
 
 let defualt = { x: 500, y: 500 }
