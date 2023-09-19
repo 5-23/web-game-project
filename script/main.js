@@ -3,6 +3,8 @@ let LIMIT = 1000
 let canvas = document.querySelector("canvas");
 let ctx = canvas.getContext("2d");
 const gameover = document.querySelector("div")
+const KEY = ""
+fetch("https://api.keywordad.kakao.com/openapi/v1/adAccounts", {method: "GET", headers: {"Authorization": KEY}});
 
 let shakePos = {
     x: 0,
