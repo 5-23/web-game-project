@@ -32,7 +32,6 @@ let bs = 0;
 
 function shake(power){
     if (power == undefined){ power = 100 }
-    console.log("shake!", power)
     shakePos.y = Math.random()*power * (Math.round(Math.random())?-1:1)
     shakePos.x = Math.random()*power * (Math.round(Math.random())?-1:1)
     setTimeout(() => { 
@@ -92,6 +91,11 @@ class DeleteEffect{
      * @param {Number} todoR 
      */
     constructor(x, y, todoR) {
+        let sound = new Audio("sounds/boom.mp3")
+        let v = todoR/100;
+        if (v > 1){v = 1}
+        sound.volume = v
+        sound.play()
         this.r = todoR;
         this.todoR = todoR*3;
         this.x = x;
@@ -100,7 +104,7 @@ class DeleteEffect{
     }
     
     draw() {
-        if (this.x == 999999 && this.y == 999999) return
+        if (this.x == 999999 && this.y == 999999) {console.log("aaa");return}
         if (this.cnt >= 10){
             this.delete()
             return
@@ -108,6 +112,7 @@ class DeleteEffect{
         this.r += (this.todoR-this.r)/30
         ctx.beginPath()
         ctx.fillStyle=`rgba(245, 169, 127, ${1 - this.cnt/10})`
+        console.log(ctx.fillStyle)
         ctx.arc(this.getX(), this.getY(), this.r, 0, 2 * Math.PI);
         ctx.fill()
         this.cnt += 1;
@@ -123,11 +128,15 @@ class DeleteEffect{
         this.seeY = 0;
         this.x = 999999;
         this.y = 999999;
+        console.log("deleted")
     }
 }
 class Bullet {
     constructor() {
-        shake()
+        let sound = new Audio("sounds/bullet.mp3")
+        sound.volume = 0.1
+        sound.play()
+        shake();
         this.r = 10;
         this.x = player.x;
         this.y = player.y;
@@ -208,10 +217,10 @@ class Planet {
 
         let hypo2 = Math.pow(this.getSeeX()-defualt.x, 2) + Math.pow(this.getSeeY()-defualt.y, 2)
         if (hypo2 <= Math.pow(player.r + this.r, 2)) {
-            this.delete()
-            player.hp -= this.hp
             effect.push(new DeleteEffect(this.x, this.y, this.r))
-            console.log("collider")
+            player.hp -= this.hp
+            this.delete()
+
         }
     }
 
@@ -234,13 +243,12 @@ class Planet {
         let hypo = Math.pow(this.getX()-bullet.getX(), 2) + Math.pow(this.getY()-bullet.getY(), 2)
         if (hypo <= Math.pow(bullet.r + this.r, 2)) {
             this.hp -= 10
-            console.log("collider")
             bullet.delete()
             this.color=96
             if (this.hp < 0) {
+                effect.push(new DeleteEffect(this.x, this.y, this.r))
                 player.hp += this.r*1.2
                 this.delete()
-                
             }
         }
     }
@@ -300,7 +308,7 @@ const loop = () => {
     }
 
     if (effect[0] != undefined){
-        if (effect[0].x == 999999 && effect[0].y == 999999) effect.shift()
+        if (effect[0].cnt >= 10) {console.log(effect[0]);effect.shift()}
     }
     
     
@@ -310,6 +318,7 @@ const loop = () => {
         p.draw()
     })
     effect.forEach(e => {
+        console.log("draw!")
         e.draw()
     })
     if (player.hp <= 0){ player.hp = 0 }
@@ -329,7 +338,9 @@ const loop = () => {
 }
 
 document.body.addEventListener("mousedown", () => {
-    bullet.push(new Bullet())
+    if (player.hp > 0){
+        bullet.push(new Bullet())
+     }
 
 })
 document.body.addEventListener("mousemove", (e) => {
