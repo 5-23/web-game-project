@@ -1,10 +1,19 @@
+function callBackFunc(elm) {  
+    text = [];  
+    text.push('<ins class="adsbygoogle"');  
+    text.push('style="display:inline-block;width:250px;height:250px"');  
+    text.push('data-ad-client="ca-pub-7893835816116192"');  
+    text.push('data-ad-slot="5918517081"></ins>');  
+   
+    elm.innerHTML = text.join(' ');  
+    (adsbygoogle = window.adsbygoogle || []).push({});  
+}  
+
 let debug = false;
 let LIMIT = 1000
 let canvas = document.querySelector("canvas");
 let ctx = canvas.getContext("2d");
 const gameover = document.querySelector("div")
-const KEY = ""
-fetch("https://api.keywordad.kakao.com/openapi/v1/adAccounts", {method: "GET", headers: {"Authorization": KEY}});
 
 let shakePos = {
     x: 0,
