@@ -201,6 +201,7 @@ class Planet {
         if (hypo2 <= Math.pow(player.r + this.r, 2)) {
             this.delete()
             player.hp -= this.hp
+            effect.push(new DeleteEffect(this.x, this.y, this.r))
             console.log("collider")
         }
     }
@@ -208,7 +209,6 @@ class Planet {
 
     delete(){
         if (this.seeX == 0 && this.seeY == 0) return
-        effect.push(new DeleteEffect(this.x, this.y, this.r))
         this.seeX = 0;
         this.seeY = 0;
         this.x = 999999;
@@ -231,6 +231,7 @@ class Planet {
             if (this.hp < 0) {
                 player.hp += this.r*1.2
                 this.delete()
+                
             }
         }
     }
@@ -323,8 +324,8 @@ document.body.addEventListener("mousedown", () => {
 
 })
 document.body.addEventListener("mousemove", (e) => {
-    mouse.x = e.screenX
-    mouse.y = e.screenY
+    mouse.x = e.clientX
+    mouse.y = e.clientY
 })
 
 document.body.addEventListener("keydown" , e => {
