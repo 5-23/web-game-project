@@ -219,6 +219,7 @@ class Planet {
         if (hypo2 <= Math.pow(player.r + this.r, 2)) {
             effect.push(new DeleteEffect(this.x, this.y, this.r))
             player.hp -= this.hp
+            shake(this.r*10)
             this.delete()
 
         }
@@ -231,7 +232,6 @@ class Planet {
         this.seeY = 0;
         this.x = 999999;
         this.y = 999999;
-        shake(this.r*10)
     }
 
     /**
@@ -313,7 +313,9 @@ const loop = () => {
     
     
     planet.forEach(p => {
-        if (p.moveCnt > 10000) p.delete()
+        if (p.moveCnt > 10000) {
+            shake(p.r*10)
+            p.delete()}
         p.run()
         p.draw()
     })
